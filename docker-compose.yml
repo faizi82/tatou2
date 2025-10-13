@@ -6,7 +6,7 @@ services:
       context: server
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - user-files:/app/storage
     environment:
@@ -15,9 +15,9 @@ services:
       - DB_HOST=db
       - DB_PORT=3306
       - DB_NAME=tatou
-      - DB_USER=${MARIADB_USER}
-      - DB_PASSWORD=${MARIADB_PASSWORD}
-      - FLAG_2=${FLAG_2}
+      - DB_USER=tatouuser
+      - DB_PASSWORD=tatoupass
+      - FLAG_2=8a9af3f59df055bc28f0727602b757db96f45a87
     depends_on:
       db:
         condition: service_healthy
@@ -27,15 +27,15 @@ services:
     image: mariadb:11.4
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MARIADB_ROOT_PASSWORD=rootpassword
       - MARIADB_DATABASE=tatou
-      - MARIADB_USER=${MARIADB_USER}
-      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+      - MARIADB_USER=tatouuser
+      - MARIADB_PASSWORD=tatoupass
     volumes:
       - db-data:/var/lib/mysql
       - ./db/tatou.sql:/docker-entrypoint-initdb.d/10-tatou.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u root --password=$MARIADB_ROOT_PASSWORD --silent"]
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u root --password=rootpassword --silent"]
       interval: 10s
       timeout: 5s
       retries: 5
