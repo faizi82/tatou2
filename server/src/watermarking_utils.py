@@ -41,6 +41,8 @@ from watermarking_method import (
     WatermarkingMethod,
     load_pdf_bytes,
 )
+
+from custom_eof_watermark import CustomEOFWatermark
 from add_after_eof import AddAfterEOF
 from unsafe_bash_bridge_append_eof import UnsafeBashBridgeAppendEOF
 
@@ -50,7 +52,8 @@ from unsafe_bash_bridge_append_eof import UnsafeBashBridgeAppendEOF
 
 METHODS: Dict[str, WatermarkingMethod] = {
     AddAfterEOF.name: AddAfterEOF(),
-    UnsafeBashBridgeAppendEOF.name: UnsafeBashBridgeAppendEOF()
+    UnsafeBashBridgeAppendEOF.name: UnsafeBashBridgeAppendEOF(),
+    CustomEOFWatermark.name: CustomEOFWatermark(),  # Use our custom byte-level watermark
 }
 """Registry of available watermarking methods.
 
