@@ -1,0 +1,34 @@
+Watermarked PDF
+Use pdfinfo x.pdf for metadata regarding PDF
+
+One challenge I have is that I cannot access the groups API's and see their list of watermarking methods making it harder for me to guess which method has been used.
+
+08.pdf
+Pdftotext command shows us [HWM]Group_8[/HWM] string, yet it is not visible in the PDF. Group 8's hidden watermark is simply a string made invisible, HWM probably standing for hidden watermark.
+I created a simple script "extract_watermark" that opens a pdf file, reads text, then searches for patterns like HWM. In this case it was specific.
+
+14.pdf
+tail -c 500 14.pdf | strings
+This command shows us EOF, more precisely %WM-PRE-EOF:v1 meaning they've placed a watermark before EOF; it stores a base64 encoded JSON structure containing the version, algorithm, MAC, and encrypted secret. They also encode the group ID in the PDF title field as a simple metadata watermark. 
+
+19.pdf
+A text-layer watermark inserted into the PDF content stream procuded by the Axel-Watermark module. It is directly drawn text inside the PDF page content.
+The watermark can be stripped using PyMuPDF; this script searches for text that contains "Watermarked with Axel-Watermark" and removed it from each page's text layer.
+A repeated text overlay implemented with standard PDF text operators BT/ET in the page content streams, some are visible black text, others are white 1-point text used as a hidden encrypted fingerprint.
+
+To fully remove the watermark yo would need to:
+- open the QDF
+- locate those BT .. TJ .. ET blocks with Axel-Watermark
+- remove or write those commands
+- rebuild the PDF
+
+To remove the watermark you would need to write a script that converts PDF to QDF, removes BT .. ET blocks with the watermark and then rebuilds the pdf.
+
+----------------------------------------------------
+
+Project
+The original creator of the keys had messed up the keys so I had to create new ones, initiating the un-succesfulness of inititating handshake with other groups do to not having matching public keys.
+I implemented RMAP though the payload seems to be faulty.
+I implemented a watermarking method.
+Attempting to de-watermark PDF's but have been un-successful.
+It was too large a project to do alone.
