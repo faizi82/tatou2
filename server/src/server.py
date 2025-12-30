@@ -57,13 +57,32 @@ def create_app():
             f"mysql+pymysql://{app.config['DB_USER']}:{app.config['DB_PASSWORD']}"
             f"@{app.config['DB_HOST']}:{app.config['DB_PORT']}/{app.config['DB_NAME']}?charset=utf8mb4"
         )
+                
+    def is_test_mode() -> bool:
+        return os.environ.get("TEST_MODE", "").lower() in ("1", "true", "yes", "on")
 
-    def get_engine():
-        eng = app.config.get("_ENGINE")
-        if eng is None:
+def get_engine():
+    eng = app.config.get("_ENGINE")
+    if eng is None:
+        if is_test_mode():
+            # In-memory SQLite DB for unit tests
+            eng = create_engine("sqlite+pysqlite:///:memory:", future=True)
+        else:
             eng = create_engine(db_url(), pool_pre_ping=True, future=True)
-            app.config["_ENGINE"] = eng
-        return eng
+        app.config["_ENGINE"] = eng
+    return eng
+
+def _last_insert_id(conn) -> int:
+    # SQLite
+    try:
+        v = conn.execute(text("SELECT last_insert_rowid()")).scalar()
+        if v is not None:
+            return int(v)
+    except Exception:
+        pass
+    # MySQL
+    return int(conn.execute(text("SELECT LAST_INSERT_ID()")).scalar())
+
 
     # --- Helpers ---
     def _serializer():
@@ -640,7 +659,7 @@ def create_app():
                         "path": str(dest_path),
                     },
                 )
-                vid = int(conn.execute(text("SELECT LAST_INSERT_ID()")).scalar())
+                vid = _last_insert_id(conn)
         except Exception as e:
             try:
                 dest_path.unlink(missing_ok=True)
