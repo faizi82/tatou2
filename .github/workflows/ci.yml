@@ -27,7 +27,7 @@ jobs:
           pip install pytest coverage
 
           # Install your project from pyproject.toml
-          pip install -e server/src
+          pip install -e server/
 
       - name: Run tests
         env:
